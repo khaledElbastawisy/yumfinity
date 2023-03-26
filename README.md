@@ -1,5 +1,5 @@
 # Yumfinity
-Yumifnity is a recipe-sharing mobile application that provides users with a platform to browse, search, and share recipes with others. The app is designed to cater to the needs of users with different levels of cooking expertise, from beginners to experienced chefs. The app includes features such as user reviews and ratings, the ability to save and organize recipes, and social sharing options. Users can search for recipes based on ingredients, cuisine types, and dietary restrictions. The app aims to bring together food enthusiasts and home cooks from around the world and allow them to connect and share their culinary expertise.
+Yumifnity is a recipe-sharing web application that provides users with a platform to browse, search, and share recipes with others. The app is designed to cater to the needs of users with different levels of cooking expertise, from beginners to experienced chefs. The app includes features such as user reviews and ratings, the ability to save and organize recipes, and social sharing options. Users can search for recipes based on ingredients, cuisine types, and dietary restrictions. The app aims to bring together food enthusiasts and home cooks from around the world and allow them to connect and share their culinary expertise.
 
 The application provides the following services:
 
