@@ -4,7 +4,7 @@ Yumfinity is a recipe sharing app that provides a platform for users to share, b
 
 The app includes features such as user reviews and ratings, the ability to save and organize recipes, and social sharing options. Users can search for recipes based on ingredients, cuisine types, and dietary restrictions.
 
-## What makes Yumfinity Special?
+## What Makes Yumfinity Special?
 
 Yumfinity can be used by a diverse range of individuals with different needs and preferences when it comes to cooking and meal planning. The app's flexible features can be helpful to a variety of users looking to discover and try out new recipes.
 
