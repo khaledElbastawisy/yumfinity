@@ -1,0 +1,104 @@
+{% extends '/layouts/base.html' %}
+
+{% block title %}Create Recipe{% endblock %}
+
+{% block content %}
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .container {
+      max-width: 1000px;
+    }
+    .card {
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+      border-radius: 10px;
+    }
+    .card-title {
+      font-weight: bold;
+      text-transform: uppercase;
+      border-bottom: 2px solid #007bff;
+      display: inline-block;
+      padding-bottom: 2px;
+    }
+    .alert {
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+      <div class="card">
+          <div class="card-body">
+              <h4 class="card-title mb-4">Create Your Recipe</h4>
+              <form method="POST" action="{{ url_for('home_blueprint.create_recipe') }}" enctype="multipart/form-data">
+                  {{ form.csrf_token }}
+                  <div class="form-group row">
+                      <label for="{{ form.name.id }}" class="col-sm-2 col-form-label">Name:</label>
+                      <div class="col-sm-10">
+                          {{ form.name(class='form-control') }}
+                      </div>
+                  </div>
+                  <!-- Add the description form-group -->
+                  <div class="form-group row">
+                      <label for="{{ form.description.id }}" class="col-sm-2 col-form-label">Description:</label>
+                      <div class="col-sm-10">
+                          {{ form.description(class='form-control', rows=5) }}
+                      </div>
+                  </div>
+                  <div class="form-group row">
+                      <label for="{{ form.cuisine.id }}" class="col-sm-2 col-form-label">Cuisine:</label>
+                      <div class="col-sm-10">
+                          {{ form.cuisine(class='form-control') }}
+                      </div>
+                  </div>
+
+                  <div class="form-group row">
+                      <label for="{{ form.ingredients.id }}" class="col-sm-2 col-form-label">Ingredients (one per line):</label>
+                      <div class="col-sm-10">
+                          {{ form.ingredients(class='form-control', rows=5) }}
+                      </div>
+                  </div>
+                  <div class="form-group row">
+                      <label for="{{ form.instructions.id }}" class="col-sm-2 col-form-label">Instructions (one per line):</label>
+                      <div class="col-sm-10">
+                          {{ form.instructions(class='form-control', rows=5) }}
+                      </div>
+                  </div>
+
+                  <div class="form-group row">
+                      <label for="{{ form.cooking_time.id }}" class="col-sm-2 col-form-label">Cooking Time (minutes):</label>
+                      <div class="col-sm-10">
+                          {{ form.cooking_time(class='form-control') }}
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      {% with messages = get_flashed_messages(with_categories=true) %}
+                      {% if messages %}
+                        <div class="container mt-3">
+                          {% for category, message in messages %}
+                            <div class="alert alert-danger" role="alert">
+                              {{ message }}
+                            </div>
+                          {% endfor %}
+                        </div>
+                      {% endif %}
+                    {% endwith %}
+                      <label for="{{ form.image.id }}">Image</label>
+                          {{ form.image(class='form-control') }}
+                    </div>
+                  <div class="form-group row">
+                      <div class="col-sm-2"></div>
+                      <div class="col-sm-10">
+                          <button type="submit" class="btn btn-primary">Create Recipe</button>
+                      </div>
+                  </div>
+              </form>
+          </div>
+      </div>
+  </div>
+{% endblock %}

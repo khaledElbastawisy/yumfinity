@@ -1,0 +1,240 @@
+
+{% extends "layouts/base.html" %}
+
+{% block title %} Home {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+    <!-- chartist CSS -->
+    <link href="{{ config.ASSETS_ROOT }}/plugins/chartist-js/dist/chartist.min.css" rel="stylesheet">
+    <link href="{{ config.ASSETS_ROOT }}/plugins/chartist-js/dist/chartist-init.css" rel="stylesheet">
+    <link href="{{ config.ASSETS_ROOT }}/plugins/chartist-plugin-tooltip-master/dist/chartist-plugin-tooltip.css" rel="stylesheet">
+    <!--This page css - Morris CSS -->
+    <link href="{{ config.ASSETS_ROOT }}/plugins/c3-master/c3.min.css" rel="stylesheet">
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+    <!-- ============================================================== -->
+    <!-- Bread crumb and right sidebar toggle -->
+    <!-- ============================================================== -->
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Beautified HTML</title>
+        <!-- Include Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <!-- Include Font Awesome for the icons -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+Knujsl7/1L_dstPt3HV5HzF6Gvk/e3s0eJf1PtFfnFt00r" crossorigin="anonymous">
+        <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/custom.css') }}" />
+
+    </head>
+    <body>
+        <div class="container">
+            <div class="row align-items-center mt-3">
+                <div class="col-md-6 col-8 align-self-center">
+                    <h3 class="page-title mb-0 p-0">Browse and share your favorite recipes</h3>
+                </div>
+                <div class="col-md-6 col-4 align-self-center">
+                    <div class="d-flex justify-content-end">
+                        <form action="/create_recipe" method="GET" class="mr-2">
+                            <button class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add Recipe
+                            </button>
+                        </form>
+                        <form action="/browse_recipes" method="GET">
+                            <button class="btn btn-primary">
+                                <i class="fas fa-search"></i> Browse All Recipes
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+
+    <div class="container-fluid">
+
+        <div class="row">
+            <!-- Column -->
+            <div class="col-lg-4 col-xlg-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">People You Follow</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if followed_users|length == 0 %}
+                        <strong>You are not following anyone.</strong>
+                        {% else %}
+                        <ul class="list-unstyled">
+                            {% for user in followed_users %}
+                            <li class="user-item">
+                                <div class="user-info">
+                                    <strong><a href="/author/{{ user.user_id }}">{{ user.username }}</a></strong>
+                                </div>
+                                <div class="user-stats">
+                                    <span>{{ user.recipes_count }} Recipes</span>
+                                    {% if user.avg_rating == None %}
+                                    <span>No Ratings</span>
+                                    {% else %}
+                                    <span>{{ user.avg_rating|round(2) }} Avg Rating</span>
+                                    {% endif %}
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if feature_recipe %}
+                <div class="card recipe-card">
+                    <div class="card-body bg-primary recipe-header">
+                        <h4 class="text-white card-title recipe-title">Recipe of the Day</h4>
+                        <h6 class="text-white card-subtitle mb-2 op-5 recipe-subtitle">Check out our daily featured recipe!</h6>
+                    </div>
+                    <div class="card-body recipe-body">
+                        <div class="message-box contact-box">
+                            <div class="message-widget contact-widget">
+                                <div class="mail-contnet recipe-content">
+                                    <h1 class="mb-3 recipe-name">{{ feature_recipe.name }}</h1>
+                                    <img src="{{ url_for('static', filename='assets/images/' + feature_recipe.image) }}" alt="{{ feature_recipe.name }}" class="img-fluid rounded mb-3 recipe-image">
+                                    <p><strong>Author:</strong> {{ feature_recipe_author }}</p>
+                                    <p><strong>Cooking Time:</strong> {{ feature_recipe.cooking_time }} minutes</p>
+                                    <a href="{{ url_for('home_blueprint.recipe_details', recipe_id=feature_recipe.id) }}" class="btn btn-block recipe-details-btn">View Recipe Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-lg-8 col-xlg-9">
+                <div class="card">
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs profile-tab" role="tablist">
+                        <li class="nav-item"> <a class="nav-link active" data-bs-toggle="tab" href="#home"
+                                role="tab">Activity</a>
+                        </li>
+                        <li class="nav-item"> <a class="nav-link" data-bs-toggle="tab" href="#profile"
+                                role="tab">Profile</a> </li>
+                        <li class="nav-item"> <a class="nav-link" data-bs-toggle="tab" href="#settings"
+                                role="tab">Settings</a>
+                        </li>
+                    </ul>
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div class="activity tab-pane active" id="home">
+                            {% if activities|length == 0 %}
+                            <strong>You have no activity yet!</strong>
+                            {% else %}
+                            <ul class="activity-list">
+                                {% for activity in activities %}
+                                <li class="activity-item">
+                                    {% if activity.activity_type == 'post' %}
+                                    <span class="activity-icon text-primary">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </span>
+                                    {% elif activity.activity_type == 'rate' %}
+                                    <span class="activity-icon text-warning">
+                                        <i class="bi bi-star-fill"></i>
+                                    </span>
+                                    {% elif activity.activity_type == 'comment' %}
+                                    <span class="activity-icon text-info">
+                                        <i class="bi bi-chat-text-fill"></i>
+                                    </span>
+                                    {% endif %}
+                
+                                    <div class="activity-content">
+                                        {% if activity.activity_type == 'post' %}
+                                        <strong><a href="/author/{{ activity.user_id }}">{{ activity.user_name }}</a></strong> posted a new recipe <strong><a href="/recipe/{{ activity.recipe_id }}">{{ activity.recipe_name }}</a></strong>
+                                        {% elif activity.activity_type == 'rate' %}
+                                        <strong><a href="/author/{{ activity.user_id }}">{{ activity.user_name }}</a></strong> gave this recipe <strong><a href="/recipe/{{ activity.recipe_id }}">{{ activity.recipe_name }}</a></strong> a <span class="rating-stars">{{ activity.rating }}</span> star rating
+                                        {% elif activity.activity_type == 'comment' %}
+                                        <strong><a href="/author/{{ activity.user_id }}">{{ activity.user_name }}</a></strong> commented on this recipe <strong><a href="/recipe/{{ activity.recipe_id }}">{{ activity.recipe_name }}</a></strong>: <em>{{ activity.comment_text }}</em>
+                                        {% endif %}
+                                        <div class="activity-timestamp">
+                                            {{ activity.timestamp.strftime('%B %d, %Y %I:%M %p') }}
+                                        </div>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </div>
+                        <!--second tab-->
+                        <div class="tab-pane" id="profile" role="tabpanel">
+
+                        </div>
+
+                        <div class="tab-pane" id="settings" role="tabpanel">
+                            <div class="card-body">
+                                <form class="form-horizontal form-material mx-2">
+                                    <div class="form-group">
+                                        <label class="col-md-12">Full Name</label>
+                                        <div class="col-md-12">
+                                            <input type="text" placeholder="Johnathan Doe"
+                                                class="form-control form-control-line ps-0">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="example-email" class="col-md-12">Email</label>
+                                        <div class="col-md-12">
+                                            <input type="email" placeholder="johnathan@admin.com"
+                                                class="form-control form-control-line ps-0" name="example-email"
+                                                id="example-email">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-12">Password</label>
+                                        <div class="col-md-12">
+                                            <input type="password" value="password"
+                                                class="form-control form-control-line ps-0">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <button class="btn btn-success text-white">Update Profile</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+
+        
+    </div>
+
+{% endblock content %}
+
+{% block javascripts %}
+
+    <!-- ============================================================== -->
+    <!-- This page plugins -->
+    <!-- ============================================================== -->
+    <!-- chartist chart -->
+    <script src="{{ config.ASSETS_ROOT }}/plugins/chartist-js/dist/chartist.min.js"></script>
+    <script src="{{ config.ASSETS_ROOT }}/plugins/chartist-plugin-tooltip-master/dist/chartist-plugin-tooltip.min.js"></script>
+    <!--c3 JavaScript -->
+    <script src="{{ config.ASSETS_ROOT }}/plugins/d3/d3.min.js"></script>
+    <script src="{{ config.ASSETS_ROOT }}/plugins/c3-master/c3.min.js"></script>
+    <!--Custom JavaScript -->
+    <script src="{{ config.ASSETS_ROOT }}/js/pages/dashboards/dashboard1.js"></script>
+    <!-- <script>
+        document.getElementById("comment-link").addEventListener("click", function() {
+            document.getElementById("comment-box").style.display = "block";
+        });
+    </script> -->
+
+{% endblock javascripts %}    

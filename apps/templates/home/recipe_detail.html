@@ -1,0 +1,170 @@
+{% extends '/layouts/base.html' %}
+{% block content %}
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ recipe.name }}</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .container {
+      background-color: white;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    .rating {
+      font-size: 2rem;
+      color: gold;
+    }
+    .rate-count {
+      color: black;
+      font-size: 1rem;
+    }
+    .section-title {
+      font-weight: bold;
+      margin-bottom: .5rem;
+      margin-top: 1.5rem;
+      text-transform: uppercase;
+      border-bottom: 2px solid #007bff;
+      display: inline-block;
+      padding-bottom: 2px;
+    }
+    .form-inline .form-control {
+      width: auto;
+    }
+    .img-container {
+      overflow: hidden;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+    .cuisine {
+      background-color: #007bff;
+      color: white;
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+    .description {
+      font-size: 1.1rem;
+      color: #333;
+      margin-bottom: 1.5rem;
+    }
+    .follow-btn {
+      background-color: #007bff;
+      border-color: #007bff;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: inline-block;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+    .follow-btn:hover {
+      background-color: #0056b3;
+      border-color: #0056b3;
+    }
+    .following-btn {
+      background-color: #ccc;
+      border-color: #ccc;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <h1>{{ recipe.name }}</h1> 
+    <p class="cuisine">{{ recipe.cuisine }}</p>
+    <div class="img-container">
+      <img src="{{ url_for('static', filename='/assets/images/' + recipe.image) }}" alt="{{ recipe.name }}" class="img-fluid">
+    </div>
+    <p class="description">{{ recipe.description }}</p>
+    <p><strong>Author:</strong> {{ author }}
+        {% if recipe.user_id == user.id %}
+          <span>(You)</span>
+        {% elif isFollowing %}
+          <span class="following-btn">Following</span>
+        {% else %}
+          <form action="/follow_author" method="POST" style="display: inline;">
+            <input type="hidden" name="author_id" value="{{ author.id }}">
+            <input type="hidden" name="recipe_id" value="{{ recipe.id }}">
+            <button type="submit" class="follow-btn">Follow</button>
+          </form>
+        {% endif %}
+        </p>
+    <p><strong>Cooking Time:</strong> {{ recipe.cooking_time }} minutes</p>
+    <h4 class="section-title">Ingredients</h4>
+    <ul>
+      {% for ingredient in ingredients %}
+        <li>{{ ingredient.name }}</li>
+      {% endfor %}
+    </ul>
+    <h4 class="section-title">Instructions</h4>
+    <ol>
+      {% for instruction in instructions %}
+        <li>{{ instruction.method }}</li>
+      {% endfor %}
+    </ol>
+
+    <!--Rating-->
+    <h4 class="section-title">Recipe Rating</h4>
+    {% if rating %}
+    <p class="rating">{{ rating }} &#9733; <span class="rate-count"> ({{ rate_count }})</span></p>
+    {% else %}
+      <p class="rating">No ratings yet</p>
+    {% endif %}
+    {% if isRated %}
+      <p>You have already rated this recipe.</p>
+    {% else %}
+
+    <form action="rate_recipe" method="POST">
+      <div class="form-group form-inline">
+        <label for="rating" class="mr-2">Rate this recipe:</label>
+        <input type="hidden" name="recipe_id" value="{{ recipe.id }}">
+        <input type="hidden" name="username" value="{{ user }}">
+        <input type="number" class="form-control mr-2" id="rating" name="rating" min="1" max="5" step="1">
+        <button type="submit" class="btn btn-primary">Submit Rating</button>
+      </div>
+    </form>
+    {% endif %}
+
+    <!--Comments-->
+    <h4 class="section-title">Comments</h4>
+    {% for comment in comments %}
+    <div class="card mb-3">
+        <div class="card-header bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">{{ comment.username }}</h5>
+                <small class="text-muted">{{ comment.timestamp.strftime('%B %d, %Y %I:%M %p') }}</small>
+            </div>
+        </div>
+        <div class="card-body">
+            <p class="card-text">{{ comment.content }}</p>
+        </div>
+    </3>
+    </div>
+    {% endfor %}
+    <form action="submit_comment" method="POST">
+      <div class="form-group">
+        <label for="comment">Add a comment:</label>
+        <input type="hidden" name="recipe_id" value="{{ recipe.id }}">
+        <input type="hidden" name="username" value="{{ user }}">
+        <textarea class="form-control" id="comment" name="comment" rows="3"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit Comment</button>
+    </form>
+  </div>
+</body>
+{% endblock %}
