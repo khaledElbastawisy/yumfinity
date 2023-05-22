@@ -8,6 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 import sqlite3
 import os
+import sys
 
 current_directory = os.getcwd()
 db_path=current_directory+"\\apps\\db.sqlite3"
@@ -84,7 +85,10 @@ def delete_recipe_trails(path):
 
 class WebAppTests(unittest.TestCase):
     def setUp(self):
-        self.driver = webdriver.Chrome(service=Service('Yumfinity\\chromedriver.exe'))
+        if sys.platform.startswith('win'):
+            self.driver = webdriver.Chrome(service=Service('Yumfinity\\chromedriver_win32\\chromedriver.exe'))
+        else:
+            self.driver = webdriver.Chrome(service=Service('Yumfinity\\linux_chromedriver\\chromedriver.exe'))
         self.driver.implicitly_wait(2)
     
     def tearDown(self):
