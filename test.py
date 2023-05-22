@@ -9,10 +9,12 @@ from selenium.common.exceptions import NoSuchElementException
 import sqlite3
 import os
 
+current_directory = os.getcwd()
+db_path=current_directory+"\\apps\\db.sqlite3"
+image =current_directory+"\\Burger.PNG"
 
 #Helper function that clean the code from the
-def delete_test_user():
-        path=r"K:\Software Engineering\\Yumfinity\\apps\db.sqlite3"
+def delete_test_user(path):
         conn = sqlite3.connect(path)
         c = conn.cursor()
         c.execute('''SELECT id FROM user WHERE username = 'test_user';''')
@@ -25,8 +27,7 @@ def delete_test_user():
         conn.commit()
         conn.close()
 
-def delete_test_follows():
-        path=r"K:\Software Engineering\\Yumfinity\\apps\db.sqlite3"
+def delete_test_follows(path):
         conn = sqlite3.connect(path)
         c = conn.cursor()
         c.execute('''SELECT id FROM user WHERE username = 'followtester';''')
@@ -38,24 +39,21 @@ def delete_test_follows():
         conn.commit()
         conn.close()
 
-def delete_test_comment():
-        path=r"K:\Software Engineering\\Yumfinity\\apps\db.sqlite3"
+def delete_test_comment(path):
         conn = sqlite3.connect(path)
         c = conn.cursor()
         c.execute('''DELETE FROM comment WHERE user_id = 1 AND content = 'Nice Meal';''')
         conn.commit()
         conn.close()
 
-def delete_test_rating():
-        path=r"K:\Software Engineering\\Yumfinity\\apps\db.sqlite3"
+def delete_test_rating(path):
         conn = sqlite3.connect(path)
         c = conn.cursor()
         c.execute('''DELETE FROM rating WHERE user_id = 1;''')
         conn.commit()
         conn.close()
 
-def delete_recipe():
-        path=r"K:\Software Engineering\\Yumfinity\\apps\db.sqlite3"
+def delete_recipe(path):
         conn = sqlite3.connect(path)
         c = conn.cursor()
         c.execute('''SELECT id FROM recipe WHERE name = 'Beef Burger';''')
@@ -70,8 +68,7 @@ def delete_recipe():
         conn.commit()
         conn.close()
 
-def delete_recipe_trails():
-        path=r"K:\Software Engineering\\Yumfinity\\apps\db.sqlite3"
+def delete_recipe_trails(path):
         conn = sqlite3.connect(path)
         c = conn.cursor()
         c.execute('''SELECT id FROM recipe WHERE name = 'Beef Burger';''')
@@ -112,7 +109,7 @@ class WebAppTests(unittest.TestCase):
         assert home_title.is_displayed()
 
     def test_registration_success(self):
-        delete_test_user()
+        delete_test_user(db_path)
         driver = self.driver
         driver.get("http://localhost:5000")
 
@@ -264,7 +261,7 @@ class WebAppTests(unittest.TestCase):
             
     def test_following(self):
         #delete test follower to be created later. This is done to avoid filling up the database with test data
-        delete_test_follows()
+        delete_test_follows(db_path)
         driver = self.driver
         driver.maximize_window()
         driver.get("http://localhost:5000")
@@ -329,7 +326,7 @@ class WebAppTests(unittest.TestCase):
         assert following_button.is_displayed()  # Wait for up to 10 seconds
     
     def test_comments(self):
-        delete_test_comment()
+        delete_test_comment(db_path)
         driver = self.driver
         driver.maximize_window()
         driver.get("http://localhost:5000")
@@ -375,7 +372,7 @@ class WebAppTests(unittest.TestCase):
 
 
     def test_rating(self):
-        delete_test_rating()
+        delete_test_rating(db_path)
         driver = self.driver
         driver.maximize_window()
         driver.get("http://localhost:5000")
@@ -435,7 +432,7 @@ class WebAppTests(unittest.TestCase):
         assert Activity_tab.is_displayed()
 
     def test_add_recipe(self):
-        delete_recipe()
+        delete_recipe(db_path)
         self.driver.get("http://localhost:5000")
         # Find the username and password input fields and enter the credentials
         username_field = self.driver.find_element(By.NAME,"username")
@@ -509,7 +506,6 @@ class WebAppTests(unittest.TestCase):
 
         ## Attaching the image
         input = self.driver.find_element(By.CSS_SELECTOR, "input.form-control#image")
-        image = r'K:\Software Engineering\\Yumfinity\Burger.PNG'
         input.send_keys(image)
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(3)
@@ -525,7 +521,7 @@ class WebAppTests(unittest.TestCase):
         assert home_title.is_displayed()
     
     def test_add_delete_recipe(self):
-        delete_recipe()
+        delete_recipe(db_path)
         self.driver.get("http://localhost:5000")
         self.driver.maximize_window()
         # Find the username and password input fields and enter the credentials
@@ -600,7 +596,6 @@ class WebAppTests(unittest.TestCase):
 
         ## Attaching the image
         input = self.driver.find_element(By.CSS_SELECTOR, "input.form-control#image")
-        image = r'K:\Software Engineering\\Yumfinity\Burger.PNG'
         input.send_keys(image)
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(3)
@@ -629,7 +624,7 @@ class WebAppTests(unittest.TestCase):
         delete_button = self.driver.find_element(By.XPATH, delete_button_xpath)
 
         #delete recipe references to avoid exceptions (code needs to be fixed)
-        delete_recipe_trails()
+        delete_recipe_trails(db_path)
         # Click the delete button
         delete_button.click()
         time.sleep(3)
@@ -652,7 +647,7 @@ class WebAppTests(unittest.TestCase):
             self.assertTrue(True)
 
     def test_add_edit_recipe(self):
-        delete_recipe()
+        delete_recipe(db_path)
         self.driver.get("http://localhost:5000")
         self.driver.maximize_window()
         # Find the username and password input fields and enter the credentials
@@ -727,7 +722,7 @@ class WebAppTests(unittest.TestCase):
 
         ## Attaching the image
         input = self.driver.find_element(By.CSS_SELECTOR, "input.form-control#image")
-        image = r'K:\Software Engineering\\Yumfinity\Burger.PNG'
+        print(image)
         input.send_keys(image)
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(3)
@@ -816,7 +811,6 @@ class WebAppTests(unittest.TestCase):
 
         ## Attaching the image
         input = self.driver.find_element(By.CSS_SELECTOR, "input.form-control#image")
-        image = r"K:\Software Engineering\\Yumfinity\Burger.PNG "
         input.send_keys(image)
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(3)

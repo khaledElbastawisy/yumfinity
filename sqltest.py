@@ -18,6 +18,11 @@ def delete_recipe():
         conn.commit()
         conn.close()
 
+current_directory = os.getcwd()
+db_path=repr(current_directory+"\\apps\db.sqlite3")
+image =repr(current_directory+"\Burger.PNG")
+
+print(db_path,image)
 delete_recipe()
 
 
