@@ -1,7 +1,7 @@
 import sqlite3
 import os
 
-path=r"K:\recipe2\apps\db.sqlite3"
+path=r"C:\Users\moham\Downloads\swe-proj\Yumfinity\apps\db.sqlite3"
 # Get the absolute path to the current directory
 
 
@@ -10,15 +10,20 @@ conn = sqlite3.connect(path)
 c = conn.cursor()
 
 #c.execute('''DROP TABLE IF EXISTS Users;''')
-c.execute('''DROP TABLE IF EXISTS Comment ;''')
-c.execute('''DROP TABLE IF EXISTS Rating ;''')
-c.execute('''DROP TABLE IF EXISTS Recipe ;''')
-c.execute('''DROP TABLE IF EXISTS User;''')
-c.execute('''DROP TABLE IF EXISTS Instruction;''')
-c.execute('''DROP TABLE IF EXISTS Ingredient;''')
-c.execute('''DROP TABLE IF EXISTS User_Profile;''')
-c.execute('''DROP TABLE IF EXISTS User_Activity;''')
-c.execute('''DROP TABLE IF EXISTS Follow;''')
+
+c.execute('''DELETE FROM Ingredient WHERE recipe_id = 9;''')
+
+
+#c.execute('''DROP TABLE IF EXISTS Comment ;''')
+#c.execute('''DROP TABLE IF EXISTS Rating ;''')
+#c.execute('''DROP TABLE IF EXISTS Recipe ;''')
+#c.execute('''DROP TABLE IF EXISTS User;''')
+#c.execute('''DROP TABLE IF EXISTS Instruction;''')
+#c.execute('''DROP TABLE IF EXISTS Ingredient;''')
+#c.execute('''DROP TABLE IF EXISTS User_Profile;''')
+#c.execute('''DROP TABLE IF EXISTS User_Activity;''')
+#c.execute('''DROP TABLE IF EXISTS Follow;''')
+
 
 
 

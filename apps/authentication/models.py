@@ -69,7 +69,7 @@ class Recipe(db.Model):
     image = db.Column(db.String(255), nullable=True)
 
     ingredients = db.relationship('Ingredient', backref='recipe', lazy=True, cascade='all, delete-orphan')
-    ingredients = db.relationship('Instruction', backref='recipe', lazy=True, cascade='all, delete-orphan')
+    instructions = db.relationship('Instruction', backref='recipe', lazy=True, cascade='all, delete-orphan')
     ratings = db.relationship('Rating', backref='recipe', lazy=True, cascade='all, delete-orphan')
     comments = db.relationship('Comment', backref='recipe', lazy=True, cascade='all, delete-orphan')
     activities = db.relationship('UserActivity', back_populates='recipe', lazy=True, cascade='all, delete-orphan')
