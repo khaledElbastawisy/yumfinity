@@ -163,3 +163,26 @@ body {
   .alert {
     border-radius: 10px;
   }
+
+  a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.list-group-item:first-child {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.list-group-item {
+    border-color: #f8f9fa;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}

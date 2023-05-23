@@ -6,11 +6,32 @@
 
 <head>
 <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/custom.css') }}" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
+<script>
+    function toggleFavorites() {
+        const showFavoritesButton = document.getElementById('show-favorites-btn');
+        const recipeCards = document.getElementsByClassName('recipe-card');
+        const favoritesOnly = showFavoritesButton.textContent === 'Show Favorites';
+
+        for (const card of recipeCards) {
+            if (favoritesOnly && !card.classList.contains('favorite')) {
+                card.style.display = 'none';
+            } else {
+                card.style.display = 'block';
+            }
+        }
+
+        showFavoritesButton.textContent = favoritesOnly ? 'Show All' : 'Show Favorites';
+    }
+</script>
 </head>
 
 <!-- Search form -->
 <div class="container">
+
+
     <div class="search-container">
+
         <form class="search-form" action="{{ url_for('home_blueprint.search_results') }}" method="GET">
             <input type="text" class="form-control" name="recipe_name" placeholder="Search by recipe name">
             <select class="form-control" name="cuisine">
@@ -23,6 +44,8 @@
             <button type="submit" class="btn btn-primary" id = 'search-btn'>Search</button>
         </form>
     </div>
+        <!-- Add the "Show Favorites" button -->
+        <button type="button" class="btn btn-secondary" id="show-favorites-btn" onclick="toggleFavorites()">Show Favorites</button>
     {% if searched %}
     <div class="results-count" id="results-count">
         <p class="text-muted"> We found {{ recipes_count }} recipe(s) matching your search!</p>
@@ -35,7 +58,7 @@
 <div class="tab-pane active" id="home" role="tabpanel">
     <div class="row">
         {% for recipe in Recipes %}
-        <div class="col-md-4 col-sm-6 my-3">
+        <div class="col-md-4 col-sm-6 my-3 recipe-card {% if recipe.id in favorite_recipes %}favorite{% endif %}">
             <div class="card h-100">
                 {% if recipe.image %}
                 <img src="{{ url_for('static', filename='assets/images/' + recipe.image) }}" class="card-img-top img-responsive" alt="{{ recipe.name }}">

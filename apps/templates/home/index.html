@@ -118,18 +118,18 @@
                 <div class="card">
                     <!-- Nav tabs -->
                     <ul class="nav nav-tabs profile-tab" role="tablist">
-                        <li class="nav-item"> <a class="nav-link active" data-bs-toggle="tab" href="#home"
+                        <li class="nav-item"> <a class="nav-link active" data-bs-toggle="tab" href="#activity"
                                 role="tab">Activity</a>
                         </li>
-                        <li class="nav-item"> <a class="nav-link" data-bs-toggle="tab" href="#profile"
-                                role="tab">Profile</a> </li>
+                        <li class="nav-item"> <a class="nav-link" data-bs-toggle="tab" href="#notifications"
+                                role="tab">Notifications</a> </li>
                         <li class="nav-item"> <a class="nav-link" data-bs-toggle="tab" href="#settings"
                                 role="tab">Settings</a>
                         </li>
                     </ul>
                     <!-- Tab panes -->
                     <div class="tab-content">
-                        <div class="activity tab-pane active" id="home">
+                        <div class="activity tab-pane active" id="activity">
                             {% if activities|length == 0 %}
                             <strong>You have no activity yet!</strong>
                             {% else %}
@@ -167,16 +167,43 @@
                             </ul>
                             {% endif %}
                         </div>
-                        <!--second tab-->
-                        <div class="tab-pane" id="profile" role="tabpanel">
 
+                        <!-- Second tab -->
+                        <div class="tab-pane" id="notifications" role="tabpanel">
+                            {% if notifications|length == 0 %}
+                            <div class="alert alert-info mt-3">
+                                <strong>You have no activity yet!</strong>
+                            </div>
+                            {% else %}
+                            <ul class="list-group mt-3">
+                                {% for notification in notifications %}
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            {% if notification.activity_type == 'comment' %}
+                                            <i class="fas fa-comment text-primary mr-2"></i>
+                                            <strong>{{ notification.user_name }}</strong> commented on your <a href="/recipe/{{ notification.recipe_id }}">{{ notification.recipe_name }}</a> recipe: <em>{{ notification.comment_text }}</em>
+                                            {% elif notification.activity_type == 'rate' %}
+                                            <i class="fas fa-star text-warning mr-2"></i>
+                                            <strong>{{ notification.user_name }}</strong> gave your <a href="/recipe/{{ notification.recipe_id }}">{{ notification.recipe_name }}</a> recipe a {{ notification.rating }} star rating.
+                                            {% endif %}
+
+                                            <div class="activity-timestamp">
+                                                {{ notification.timestamp.strftime('%B %d, %Y %I:%M %p') }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
                         </div>
 
                         <div class="tab-pane" id="settings" role="tabpanel">
                             <div class="card-body">
                                 <form class="form-horizontal form-material mx-2">
                                     <div class="form-group">
-                                        <label class="col-md-12">Full Name</label>
+                                        <label class="col-md-12">Username</label>
                                         <div class="col-md-12">
                                             <input type="text" placeholder="Johnathan Doe"
                                                 class="form-control form-control-line ps-0">
@@ -231,10 +258,6 @@
     <script src="{{ config.ASSETS_ROOT }}/plugins/c3-master/c3.min.js"></script>
     <!--Custom JavaScript -->
     <script src="{{ config.ASSETS_ROOT }}/js/pages/dashboards/dashboard1.js"></script>
-    <!-- <script>
-        document.getElementById("comment-link").addEventListener("click", function() {
-            document.getElementById("comment-box").style.display = "block";
-        });
-    </script> -->
+
 
 {% endblock javascripts %}    

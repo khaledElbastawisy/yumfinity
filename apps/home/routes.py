@@ -30,8 +30,14 @@ def index():
     activities = get_followed_activities(current_user.id)
     followed_users = get_followed_users(current_user.id)
     feature_recipe, feature_recipe_author = recipe_of_the_day()
+
+    # get notification for the user
+    notifications = get_user_notifications(current_user.id)
+
+
+
     return render_template('home/index.html', segment='index', activities = activities, followed_users = followed_users,
-                            feature_recipe = feature_recipe, feature_recipe_author = feature_recipe_author) 
+                            feature_recipe = feature_recipe, feature_recipe_author = feature_recipe_author, notifications = notifications ) 
 
 @blueprint.route('/browse_recipes')
 @login_required
@@ -455,7 +461,7 @@ def recipe_of_the_day():
     # Use the current date as the seed for the random number generator
     today = datetime.now().date()
     random.seed(today.toordinal())
-    
+
     recipes=Recipe.query.all()
     if recipes:
         random_recipe = random.choice(recipes)
@@ -467,3 +473,50 @@ def recipe_of_the_day():
 
 
     return random_recipe, username
+
+
+def get_user_notifications(user_id):
+
+    # Get notifications for a user
+
+    user_recipe_ids = Recipe.query.filter_by(user_id=current_user.id).all()
+    user_recipe_ids = [recipe.id for recipe in user_recipe_ids]
+
+    notify_activites = UserActivity.query.filter( (UserActivity.recipe_id.in_(user_recipe_ids)) & (UserActivity.activity_type.in_(['rate','comment']))).all()
+    notify_activites = [activity for activity in notify_activites if activity.user_id != current_user.id]
+
+    notifs = []
+    for notify in notify_activites:
+        username = User.query.filter_by(id=notify.user_id).first().username
+        recipe_name = Recipe.query.filter_by(id=notify.recipe_id).first().name
+
+        activity_data = {
+            'activity_type': notify.activity_type,
+            'timestamp': notify.timestamp,
+            'user_id': notify.user_id,
+            'user_name': username,
+        }
+
+
+        if notify.activity_type == 'rate':
+            rating = Rating.query.filter_by(id=notify.rating_id).first().rating
+            activity_data.update({
+                'recipe_id': notify.recipe_id,
+                'recipe_name': recipe_name,
+                'rating': rating,
+            })
+
+        elif notify.activity_type == 'comment':
+            comment_text = Comment.query.filter_by(id=notify.comment_id).first().content
+            activity_data.update({
+                'recipe_id': notify.recipe_id,
+                'recipe_name': recipe_name,
+                'comment_text': comment_text,
+            })
+
+        notifs.append(activity_data)
+    return notifs
+
+
+
+
