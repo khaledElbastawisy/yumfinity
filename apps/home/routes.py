@@ -292,7 +292,24 @@ def follow_author():
 
     # Redirect back to the recipe details page or another appropriate page.
 
-    return redirect(url_for('home_blueprint.recipe_details', recipe_id=recipe_id))
+    return redirect(request.referrer)
+
+@blueprint.route('/unfollow_author', methods=['POST'])
+@login_required
+def unfollow_author():
+    recipe_id = request.form.get('recipe_id')
+
+    author_id = request.form.get('author_id')
+
+    follow = Follow.query.filter_by(follower_id = current_user.id, followed_id = author_id).first()
+    db.session.delete(follow)
+    db.session.commit()
+    # Your logic to follow the author goes here.
+    # For example, save the follow action in the database.
+
+    # Redirect back to the recipe details page or another appropriate page.
+
+    return redirect(request.referrer)
 
 
 def get_followed_activities(user_id):
@@ -518,5 +535,173 @@ def get_user_notifications(user_id):
     return notifs
 
 
+@blueprint.route('/add_to_shopping_list', methods=['POST'])
+@login_required
+def add_to_shopping_list():
+    recipe_id = request.form.get('recipe_id')
+
+    # Get the shopping list for the current user
+    ingredients = request.form.getlist('ingredients[]')
+    
+    print('5555')
+    print(recipe_id)
+    print (ingredients)
+
+    # Add the ingredients to the shopping list
+    
+    for ingredient in ingredients:
+        print(ingredient)
+        new_item = ShoppingList(user_id=current_user.id, item=ingredient)
+        db.session.add(new_item)
+
+    db.session.commit()
+
+
+    return redirect(url_for('home_blueprint.recipe_details', recipe_id=recipe_id))
+
+@blueprint.route('/shopping_list')
+@login_required
+def shopping_list():
+    user_id = current_user.id
+    shopping_list = ShoppingList.query.filter_by(user_id=user_id).all()
+
+    return render_template('home/shopping_list.html', shopping_list=shopping_list)
+
+@blueprint.route('/shopping_add_item', methods=['POST'])
+@login_required
+def shopping_add_item():
+    user_id = current_user.id
+    item_name = request.form.get('item_name')
+
+    # Add new item to shopping list
+    new_item = ShoppingList(user_id=user_id, item=item_name)
+    db.session.add(new_item)
+    db.session.commit()
+
+    return redirect(url_for('home_blueprint.shopping_list'))
+
+@blueprint.route('/shopping_delete_item/<int:item_id>', methods=['POST'])
+@login_required
+def shopping_delete_item(item_id):
+    
+    # Delete the item from the user's shopping list
+    item = ShoppingList.query.get_or_404(item_id)
+    db.session.delete(item)
+    db.session.commit()
+    # Update the shopping_list data
+    return redirect(url_for('home_blueprint.shopping_list'))
+
+@blueprint.route('/my_profile')
+@login_required
+def my_profile():
+    user_id = current_user.id
+    user = User.query.filter_by(id=user_id).first()
+    profile = UserProfile.query.filter_by(user_id=user_id).first()
+    num_followers = Follow.query.filter_by(followed_id=user_id).count()
+    num_following = Follow.query.filter_by(follower_id=user_id).count()
+
+    recipes_ids = [recipe.id for recipe in Recipe.query.filter_by(user_id=user_id).all()]
+    ratings = Rating.query.filter(Rating.recipe_id.in_(recipes_ids)).all()
+    avg_rating = None if not ratings else sum(rate.rating for rate in ratings) / len(ratings)
+
+    return render_template('home/my_profile.html', profile=profile, user=user, num_followers = num_followers, num_following = num_following, avg_rating=avg_rating)
+
+@blueprint.route("/update_user", methods=["GET", "POST"])
+@login_required
+def update_user():
+    if request.method == "POST":
+        user_id = current_user.id  
+        user = User.query.get(user_id)
+        user.username = request.form["username"]
+        user.email = request.form["email"]
+        user_profile = UserProfile.query.filter_by(user_id=user_id).first()
+        user_profile.biography = request.form["bio"]
+
+
+        db.session.commit()
+        return redirect(url_for("home_blueprint.my_profile"))
+
+    user = User.query.get(1)  # Replace this with the current user's ID
+    return redirect(url_for('home_blueprint.my_profile'))
+
+@blueprint.route('/user_profile/<string:username>')
+@login_required
+def user_profile(username):
+    user = User.query.filter_by(username=username).first()
+    print(user.id)
+    user_id = user.id
+    profile = UserProfile.query.filter_by(user_id=user_id).first()
+    num_followers = Follow.query.filter_by(followed_id=user_id).count()
+    num_following = Follow.query.filter_by(follower_id=user_id).count()
+    user_recipes = Recipe.query.filter_by(user_id=user_id).all()
+    recipes_count = Recipe.query.filter_by(user_id=user_id).count()
+    isFollowing = Follow.query.filter_by(follower_id=current_user.id, followed_id=user_id).first()
+
+    recipes_ids = [recipe.id for recipe in Recipe.query.filter_by(user_id=user_id).all()]
+    ratings = Rating.query.filter(Rating.recipe_id.in_(recipes_ids)).all()
+    avg_rating = None if not ratings else sum(rate.rating for rate in ratings) / len(ratings)
+
+    return render_template('home/user_profile.html', profile=profile, user=user, num_followers = num_followers, num_following = num_following,
+                            user_recipes=user_recipes, isFollowing=isFollowing, average_rating=avg_rating, recipes_count=recipes_count)
+
+
+@blueprint.route('/create_meal_plan', methods=['GET', 'POST'])
+@login_required
+def createmealplan():
+    form = MealPlanForm(request.form)
+    recipes = Recipe.query.all()
+    user_id = current_user.id
+    print(form.is_submitted())
+    print(form.errors)
+    if form.is_submitted():
+        meal_plan = {}
+        for day in range(1, 8):
+            form_field = getattr(form, 'day{}'.format(day))
+            form_field.choices = [(recipe.id, recipe.name) for recipe in recipes]
+            meal_plan[day]=request.form['recipes[{}]'.format(day)]
+            # print(form['day{}'.format(day)])
+            # print(form_field.choices)
+            # print(form_field)
+           #meal_plan[day] = form_field
+        
+        meal1_id = meal_plan[1]
+        meal2_id = meal_plan[2]
+        meal3_id = meal_plan[3]
+        meal4_id = meal_plan[4]
+        meal5_id = meal_plan[5]
+        meal6_id = meal_plan[6]
+        meal7_id = meal_plan[7]
+        
+        plan = MealPlan(user_id=user_id, meal1_id=meal1_id, meal2_id=meal2_id, meal3_id=meal3_id,
+                                  meal4_id=meal4_id, meal5_id=meal5_id, meal6_id=meal6_id, meal7_id=meal7_id)
+        plan.save_to_db()
+        
+        flash('Meal plan saved successfully!', 'success')
+        return redirect(url_for('home_blueprint.index'))
+
+    return render_template('home/create_meal_plan.html', form=form, recipes=recipes)
+
+@blueprint.route('/my_meal_plan', methods=['GET', 'POST'])
+@login_required
+def my_meal_plan():
+    user_id = current_user.id
+    plans = MealPlan.query.filter_by(user_id=user_id)
+    recipes2 = []
+
+    for plan in plans:
+        meal_ids = [plan.meal1_id, plan.meal2_id, plan.meal3_id, plan.meal4_id, plan.meal5_id, plan.meal6_id, plan.meal7_id]
+        recipes = []
+
+        for meal_id in meal_ids:
+            recipe = Recipe.query.filter_by(id=meal_id).first()
+            if recipe:
+                recipes.append(recipe)
+
+        recipes2.append(recipes)
+
+    return render_template('home/my_meal_plan.html', plans=plans, recipes2=recipes2)
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
 

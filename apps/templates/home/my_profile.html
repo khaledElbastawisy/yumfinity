@@ -1,0 +1,171 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} User Profile {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Followers & Following Side by Side</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+  .profile-card {
+  padding: 20px;
+}
+
+.profile-card img {
+  border: 2px solid #333;
+}
+
+.profile-card h4 {
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+.profile-card h6 {
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+.follow-info a {
+  text-decoration: none;
+  color: #333;
+}
+
+.follow-info a:hover {
+  color: #007bff;
+}
+
+.follow-info i {
+  font-size: 24px;
+  margin-bottom: 5px;
+}
+
+.rating-info {
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.avg-rating {
+    margin-right: 5px;
+}
+
+.follow-info {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+.link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.value-digit {
+    font-size: 24px;
+    font-weight: bold;
+}
+  </style>
+</head>
+        <div class="page-breadcrumb">
+            <div class="row align-items-center">
+                <div class="col-md-6 col-8 align-self-center">
+                    <h3 class="page-title mb-0 p-0">Profile</h3>
+                    <div class="d-flex align-items-center">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Profile</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="container-fluid">
+
+            <div class="row">
+                <!-- Column -->
+
+                <div class="col-lg-4 col-xlg-3 col-md-5">
+                  <div class="card">
+                      <div class="card-body profile-card">
+                          <center class="mt-4">
+                              <img src="{{ config.ASSETS_ROOT }}/images/users/cheficon.png" class="rounded-circle" width="150" />
+                              <h4 class="card-title mt-2">{{user.username}}</h4>
+                              <h6 class="card-subtitle">{{profile.biography}}</h6>
+              
+                              <div class="rating-info mt-3">
+                                  <span class="avg-rating">{{ avg_rating if avg_rating else 'N/A' }}</span>
+                                  <i class="fas fa-star text-warning" aria-hidden="true"></i>
+                              </div>
+              
+                              <div class="follow-info mt-3">
+                                  <a href="javascript:void(0)" class="link">
+                                      <i class="fas fa-users" aria-hidden="true"></i>
+                                      <div class="value-digit">{{num_followers}}</div>
+                                      <div>Followers</div>
+                                  </a>
+                                  <a href="javascript:void(0)" class="link">
+                                      <i class="fas fa-user-plus" aria-hidden="true"></i>
+                                      <div class="value-digit">{{num_following}}</div>
+                                      <div>Following</div>
+                                  </a>
+                              </div>
+                          </center>
+                      </div>
+                  </div>
+              </div>
+
+                <!-- Column -->
+                <div class="col-lg-8 col-xlg-9 col-md-7">
+                    <div class="card">
+                    <div class="card-body">
+                        <form class="form-horizontal form-material mx-2" method="POST" action="{{ url_for('home_blueprint.update_user') }}">
+                        <div class="form-group">
+                            <label class="col-md-12 mb-0">Username</label>
+                            <div class="col-md-12">
+                            <input type="text" name="username" value="{{user.username}}" class="form-control ps-0 form-control-line" required> 
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="example-email" class="col-md-12">Email</label>
+                            <div class="col-md-12">
+                            <input type="email" name="email" value="{{user.email}}" class="form-control ps-0 form-control-line" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-12 mb-0">Biography</label>
+                            <div class="col-md-12">
+                            <input type="text" name="bio" value="{{profile.biography}}" class="form-control ps-0 form-control-line">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-12 d-flex">
+                            <button type="submit" class="btn btn-success mx-auto mx-md-0 text-white">Update Profile</button>
+                            </div>
+                        </div>
+                        </form>
+                    </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+
+{% endblock content %}
+
+{% block javascripts %}{% endblock javascripts %}

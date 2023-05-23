@@ -11,7 +11,7 @@ c = conn.cursor()
 
 #c.execute('''DROP TABLE IF EXISTS Users;''')
 
-c.execute('''DELETE FROM Ingredient WHERE recipe_id = 9;''')
+c.execute('''DROP TABLE IF EXISTS Shopping_List;''')
 
 
 #c.execute('''DROP TABLE IF EXISTS Comment ;''')

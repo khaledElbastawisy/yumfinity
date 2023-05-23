@@ -1,0 +1,73 @@
+{% extends '/layouts/base.html' %}
+{% block content %}
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Shopping List</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/custom.css') }}" />
+  <style>
+    body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+  }
+  
+  h2 {
+    font-weight: bold;
+    color: #4a4a4a;
+  }
+  
+  .list-group-item {
+    font-size: 18px;
+    background-color: #ffffff;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .item-name {
+    font-weight: 600;
+  }
+  
+  .delete-btn {
+    font-size: 14px;
+  }
+  
+  .form-group label {
+    font-weight: 600;
+  }
+  
+  .form-control,
+  .btn {
+    border-radius: 5px;
+  }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="mb-4 text-center">Your Shopping List</h2>
+
+    <!-- Shopping list items display -->
+    <ul class="list-group mb-4">
+        {% for item in shopping_list %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span class="item-name">{{ item.item }}</span>
+            <!-- Delete item form -->
+            <form action="{{ url_for('home_blueprint.shopping_delete_item', item_id=item.id) }}" method="POST">
+              <button type="submit" class="btn btn-danger btn-sm delete-btn">Delete</button>
+            </form>
+          </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Add item form -->
+    <form action="{{ url_for('home_blueprint.shopping_add_item') }}" method="POST" class="mb-4">
+        <div class="form-group">
+          <label for="item-name">Add Item</label>
+          <input type="text" class="form-control" id="item-name" name="item_name" placeholder="Enter item name" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Add to Shopping List</button>
+      </form>
+    </div>
+  </body>
+{% endblock %}

@@ -36,6 +36,15 @@
 
 <div class="container-fluid">
     <div class="row">
+        {%if recipes|length == 0%}
+        <div class="col-md-12">
+            <div class="alert alert-info" role="alert">
+                <h4 class="alert-heading">No Recipes Found!</h4>
+                <p>It seems you have not added any recipes yet. Click the button below to add your first recipe.</p>
+                <hr>
+                <a href="{{ url_for('home_blueprint.create_recipe') }}" class="btn btn-primary">Add Recipe</a>
+            </div>
+        {%else%}
         {% for recipe in recipes %}
         <div class="col-md-6 col-lg-4 mb-4">
             <div class="card">
@@ -79,6 +88,7 @@
             </div>
         </div>
         {% endfor %}
+        {%endif%}
     </div>
 </div>
 

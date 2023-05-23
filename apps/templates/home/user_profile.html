@@ -1,0 +1,64 @@
+{% extends '/layouts/base.html' %}
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.username }}'s Profile</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/custom.css') }}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title font-weight-bold">{{ user.username }}</h3>
+                        <p class="card-text text-muted">{{ profile.biography if profile.biography else 'No Bio' }}</p>
+                        <p class="card-text"><i class="fas fa-star text-warning"></i> Average Rating: {{ average_rating if average_rating else 'N/A' }}</p>
+                        <p class="card-text"><i class="fas fa-users"></i> Followers: {{ num_followers }}</p>
+                        <p class="card-text"><i class="fas fa-user-plus"></i> Following: {{ num_following }}</p>
+                        <p class="card-text"><i class="fas fa-utensils"></i> Recipes: {{ recipes_count }}</p>
+
+                        {%if isFollowing %}
+                        <!-- Unfollow form -->
+                        <form action="/unfollow_author" method="POST" style="display: inline;">
+                            <input type="hidden" name="author_id" value="{{ user.id }}">
+                            <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-user-minus"></i> Unfollow</button>
+                        </form>
+                        {% else %}
+                        <!-- Follow form -->
+                        <form action="/follow_author" method="POST" style="display: inline;">
+                            <input type="hidden" name="author_id" value="{{ user.id }}">
+                            <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Follow</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="row">
+                    {% for recipe in user_recipes %}
+                        <div class="col-lg-6 col-md-12 col-sm-6 mb-4">
+                            <div class="card h-100">
+                                <img src="{{ url_for('static', filename='/assets/images/' + recipe.image) }}" class="card-img-top" alt="{{ recipe.name }}">
+                                <div class="card-body">
+                                    <h5 class="card-title font-weight-bold">{{ recipe.name }}</h5>
+                                    <p class="card-text text-muted">{{ recipe.description }}</p>
+                                </div>
+                                <div class="card-footer">
+                                    <a href="{{ url_for('home_blueprint.recipe_details', recipe_id=recipe.id) }}" class="btn btn-secondary btn-sm"><i class="fas fa-info-circle"></i> View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+{% endblock %}

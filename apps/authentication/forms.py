@@ -4,8 +4,8 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField,TextAreaField, SelectField, IntegerField
-from wtforms.validators import Email, DataRequired
+from wtforms import StringField, PasswordField,TextAreaField, SelectField, IntegerField, RadioField
+from wtforms.validators import Email, DataRequired, InputRequired
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 
 
@@ -60,3 +60,12 @@ class RecipeForm(FlaskForm):
     
     # Add the cooking time input field (in minutes)
     cooking_time = IntegerField('cooking_time', validators=[DataRequired()])
+
+class MealPlanForm(FlaskForm):
+    day1 = RadioField('Day 1', validators=[InputRequired()], choices=['value'])
+    day2 = RadioField('Day 2', validators=[InputRequired()], choices=['value'])
+    day3 = RadioField('Day 3', validators=[InputRequired()], choices=['value'])
+    day4 = RadioField('Day 4', validators=[InputRequired()], choices=['value'])
+    day5 = RadioField('Day 5', validators=[InputRequired()], choices=['value'])
+    day6 = RadioField('Day 6', validators=[InputRequired()], choices=['value'])
+    day7 = RadioField('Day 7', validators=[InputRequired()], choices=['value'])

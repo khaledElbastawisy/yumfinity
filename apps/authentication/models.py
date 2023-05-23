@@ -37,6 +37,8 @@ class User(db.Model, UserMixin):
     activities = db.relationship('UserActivity', back_populates='user', lazy=True)
     followers = db.relationship('Follow', foreign_keys=[Follow.followed_id], back_populates='followed', lazy='dynamic', cascade='all, delete-orphan')
     following = db.relationship('Follow', foreign_keys=[Follow.follower_id], back_populates='follower', lazy='dynamic', cascade='all, delete-orphan')
+    shopping_list = db.relationship('ShoppingList', backref='user', lazy=True, cascade='all, delete-orphan')
+    meal_plan = db.relationship('MealPlan', backref='user', lazy=True, cascade='all, delete-orphan')
 
     def __init__(self, **kwargs):
         for property, value in kwargs.items():
@@ -242,6 +244,8 @@ class UserProfile(db.Model):
 
             # Update the favorite_recipe_ids column with the new list
             self.favorite_recipes = current_favorites
+    
+
 
 class UserActivity(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -279,6 +283,53 @@ class UserActivity(db.Model):
         else:
             raise ValueError('Invalid activity_type')
 
+class ShoppingList(db.Model, UserMixin):
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    item = db.Column(db.String(64), nullable=False)
+
+
+
+
+    def __init__(self, **kwargs):
+        for property, value in kwargs.items():
+            # depending on whether value is an iterable or not, we must
+            # unpack it's value (when **kwargs is request.form, some values
+            # will be a 1-element list)
+            if hasattr(value, '__iter__') and not isinstance(value, str):
+                # the ,= unpack of a singleton fails PEP8 (travis flake8 test)
+                value = value[0]
+
+            if property == 'password':
+                value = hash_pass(value)  # we need bytes here (not plain str)
+
+            setattr(self, property, value)
+
+class MealPlan(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    meal1_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=False)
+    meal2_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=False)
+    meal3_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=False)
+    meal4_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=False)
+    meal5_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=False)
+    meal6_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=False)
+    meal7_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=False)
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def get_recipe(self,meal_id):
+        return Recipe.query.filter_by(id=meal_id)
+    
+    def __init__(self, **kwargs):
+        for property, value in kwargs.items():
+            if hasattr(value, '__iter__') and not isinstance(value, str):
+                value = value[0]
+            setattr(self, property, value)
 
 
 @login_manager.user_loader

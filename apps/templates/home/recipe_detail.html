@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ recipe.name }}</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/custom.css') }}" />
+
   <style>
     body {
       background-color: #f8f9fa;
@@ -15,72 +17,6 @@
       padding: 30px;
       box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
     }
-    .rating {
-      font-size: 2rem;
-      color: gold;
-    }
-    .rate-count {
-      color: black;
-      font-size: 1rem;
-    }
-    .section-title {
-      font-weight: bold;
-      margin-bottom: .5rem;
-      margin-top: 1.5rem;
-      text-transform: uppercase;
-      border-bottom: 2px solid #007bff;
-      display: inline-block;
-      padding-bottom: 2px;
-    }
-    .form-inline .form-control {
-      width: auto;
-    }
-    .img-container {
-      overflow: hidden;
-      border-radius: 10px;
-      margin-bottom: 1rem;
-    }
-    .cuisine {
-      background-color: #007bff;
-      color: white;
-      padding: 2px 10px;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      display: inline-block;
-      margin-bottom: 1rem;
-    }
-    .description {
-      font-size: 1.1rem;
-      color: #333;
-      margin-bottom: 1.5rem;
-    }
-    .follow-btn {
-      background-color: #007bff;
-      border-color: #007bff;
-      color: white;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 600;
-      display: inline-block;
-      transition: background-color 0.3s, border-color 0.3s;
-    }
-    .follow-btn:hover {
-      background-color: #0056b3;
-      border-color: #0056b3;
-    }
-    .following-btn {
-      background-color: #ccc;
-      border-color: #ccc;
-      color: white;
-      padding: 5px 10px;
-      border-radius: 5px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      display: inline-block;
-    }
   </style>
 </head>
 <body>
@@ -90,27 +26,48 @@
     <div class="img-container">
       <img src="{{ url_for('static', filename='/assets/images/' + recipe.image) }}" alt="{{ recipe.name }}" class="img-fluid">
     </div>
+    <p><strong>Author:</strong> <a href="{{ url_for('home_blueprint.user_profile', username=author) }}">{{ author }}</a></p>
+      {% if recipe.user_id == user.id %}
+      <span>(You)</span>
+      {% elif isFollowing %}
+      <!-- Unfollow form -->
+      <form action="/unfollow_author" method="POST" style="display: inline;">
+          <input type="hidden" name="author_id" value="{{ author.id }}">
+          <input type="hidden" name="recipe_id" value="{{ recipe.id }}">
+          <button type="submit" class="unfollow-btn">Unfollow</button>
+      </form>
+      {% else %}
+      <!-- Follow form -->
+      <form action="/follow_author" method="POST" style="display: inline;">
+          <input type="hidden" name="author_id" value="{{ author.id }}">
+          <input type="hidden" name="recipe_id" value="{{ recipe.id }}">
+          <button type="submit" class="follow-btn">Follow</button>
+      </form>
+      {% endif %}
+    </p>
+
     <p class="description">{{ recipe.description }}</p>
-    <p><strong>Author:</strong> {{ author }}
-        {% if recipe.user_id == user.id %}
-          <span>(You)</span>
-        {% elif isFollowing %}
-          <span class="following-btn">Following</span>
-        {% else %}
-          <form action="/follow_author" method="POST" style="display: inline;">
-            <input type="hidden" name="author_id" value="{{ author.id }}">
-            <input type="hidden" name="recipe_id" value="{{ recipe.id }}">
-            <button type="submit" class="follow-btn">Follow</button>
-          </form>
-        {% endif %}
-        </p>
+
     <p><strong>Cooking Time:</strong> {{ recipe.cooking_time }} minutes</p>
+
     <h4 class="section-title">Ingredients</h4>
     <ul>
       {% for ingredient in ingredients %}
         <li>{{ ingredient.name }}</li>
       {% endfor %}
     </ul>
+
+    <!-- Add to My Shopping List form -->
+    <form id="shopping-list-form" action="/add_to_shopping_list" method="POST">
+      <input type="hidden" name="recipe_id" value="{{ recipe.id }}">
+      {% for ingredient in ingredients %}
+        <input type="hidden" name="ingredients[]" value="{{ ingredient.name }}">
+      {% endfor %}
+      <button id="add-to-shopping-list-btn" type="submit" class="add-to-shopping-list-btn">Add to My Shopping List</button>
+    </form>
+    <!-- Success message container -->
+    <div id="success-message" style="display: none;">Ingredients added to shopping list!</div>
+
     <h4 class="section-title">Instructions</h4>
     <ol>
       {% for instruction in instructions %}
@@ -167,4 +124,33 @@
     </form>
   </div>
 </body>
+
+<script>
+  document.getElementById('shopping-list-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const form = e.target;
+    const button = document.getElementById('add-to-shopping-list-btn');
+    const successMessage = document.getElementById('success-message');
+  
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        credentials: 'same-origin',
+      });
+  
+      if (response.ok) {
+        button.disabled = true;
+        successMessage.style.display = 'block';
+      } else {
+        // Handle server-side errors, if any
+        console.error('Error adding ingredients to shopping list');
+      }
+    } catch (err) {
+      // Handle client-side errors, if any
+      console.error('Error adding ingredients to shopping list:', err);
+    }
+  });
+  </script>
 {% endblock %}
