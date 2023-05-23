@@ -452,6 +452,10 @@ def delete_recipe(id):
     return redirect(url_for('home_blueprint.my_recipes'))
 
 def recipe_of_the_day():
+    # Use the current date as the seed for the random number generator
+    today = datetime.now().date()
+    random.seed(today.toordinal())
+    
     recipes=Recipe.query.all()
     if recipes:
         random_recipe = random.choice(recipes)
