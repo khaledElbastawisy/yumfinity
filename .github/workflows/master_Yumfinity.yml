@@ -23,14 +23,14 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: https://khaledregistry.azurecr.io/
-        username: ${{ secrets.AzureAppService_ContainerUsername_455916ea94cb42dca1a030e3af21b923 }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_45e39ec8970e4ae590883abf9a53f5b5 }}
+        username: ${{ secrets.AzureAppService_ContainerUsername_dfa908e6ce55414cb04a48993792211d }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_a2aeb365fa76498f8a27baf45a0c6d38 }}
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: khaledregistry.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_455916ea94cb42dca1a030e3af21b923 }}/yumfinity:${{ github.sha }}
+        tags: khaledregistry.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_dfa908e6ce55414cb04a48993792211d }}/yumfinity:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -47,5 +47,5 @@ jobs:
       with:
         app-name: 'Yumfinity'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_bf0f690164a547479e27c080c1296aba }}
-        images: 'khaledregistry.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_455916ea94cb42dca1a030e3af21b923 }}/yumfinity:${{ github.sha }}'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_8366a6a8e66c4dc9853ff86443b9564a }}
+        images: 'khaledregistry.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_dfa908e6ce55414cb04a48993792211d }}/yumfinity:${{ github.sha }}'
