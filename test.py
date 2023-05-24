@@ -35,8 +35,12 @@ def delete_test_follows(path):
         result = c.fetchone()
         if result is not None:
             user_id = result[0]
-            query = "DELETE FROM follow WHERE follower_id = "+str(user_id)+";"
-            c.execute(query)
+            tables = ["comment", "rating", "user_profile", "shopping_list", "user_activity"]
+            for table in tables:
+                query = "DELETE FROM "+table+" WHERE user_id = "+str(user_id)+";"
+                c.execute(query)
+            c.execute("DELETE FROM follow WHERE follower_id = "+str(user_id)+";")
+            c.execute("DELETE FROM follow WHERE followed_id = "+str(user_id)+";")
         conn.commit()
         conn.close()
 
@@ -69,20 +73,6 @@ def delete_recipe(path):
         conn.commit()
         conn.close()
 
-def delete_recipe_trails(path):
-        conn = sqlite3.connect(path)
-        c = conn.cursor()
-        c.execute('''SELECT id FROM recipe WHERE name = 'Beef Burger';''')
-        result = c.fetchone()
-        if result is not None:
-            user_id = result[0]
-            tables = ["instruction", "ingredient", "rating", "comment", "user_activity"]
-            for table in tables:
-                query = "DELETE FROM "+table+" WHERE recipe_id = "+str(user_id)+";"
-                c.execute(query)
-        conn.commit()
-        conn.close()
-
 class WebAppTests(unittest.TestCase):
     def setUp(self):
         if sys.platform.startswith('win'):
@@ -109,8 +99,34 @@ class WebAppTests(unittest.TestCase):
 
         # Wait for the page to load after login (e.g., check for an element on the home page)
         driver.implicitly_wait(10)  # Wait for up to 10 seconds
-        home_title = driver.find_element(By.XPATH,"//h3[contains(text(),'Browse and share your favorite recipes')]")
+        home_title = driver.find_element(By.XPATH,"//h3[contains(text(),'Your online cookbook')]")
         assert home_title.is_displayed()
+
+    def test_logout(self):
+        driver = self.driver
+        driver.maximize_window()
+        driver.get("http://localhost:5000")
+        # Find the username and password input fields and enter the credentials
+        username_field = driver.find_element(By.NAME,"username")
+        password_field = driver.find_element(By.NAME,"password")
+        username_field.send_keys("Khaled Elbastawisy")
+        password_field.send_keys("Dodobasta5")
+
+        # Submit the login form
+        login_button = driver.find_element(By.NAME,"login")
+        login_button.click()
+
+        # Wait for the page to load after login (e.g., check for an element on the home page)
+        driver.implicitly_wait(10)  # Wait for up to 10 seconds
+        #find logout button and click it
+        shut_down = driver.find_element(By.XPATH,'//*[@id="main-wrapper"]/aside/div[2]/div/div/a/i')
+        shut_down.click()
+
+        time.sleep(1)
+
+        username_field = driver.find_element(By.NAME,"username")
+
+        assert username_field.is_displayed()
 
     def test_registration_success(self):
         delete_test_user(db_path)
@@ -235,7 +251,7 @@ class WebAppTests(unittest.TestCase):
         time.sleep(2)
         # Wait for the page to load after login (e.g., check for an element on the home page)
         home_title = WebDriverWait(self.driver, 3).until(
-            EC.visibility_of_element_located((By.XPATH, "//h3[contains(text(),'Browse and share your favorite recipes')]"))
+            EC.visibility_of_element_located((By.XPATH, "//h3[contains(text(),'Your online cookbook')]"))
         )
 
         # finding the browse all recipes button
@@ -290,45 +306,276 @@ class WebAppTests(unittest.TestCase):
         view_recipe_button.click()
         time.sleep(1)
         #look for comments section
-      
-        
-        follow_button =  WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Follow')]")))
-        element_position = 0
-        while True:
-            # Scroll the page to bring the follow button into view
-            driver.execute_script("arguments[0].scrollIntoView();", follow_button)
+        ingredients = driver.find_element(By.XPATH, "//h4[@class='section-title' and text()='Ingredients']")
+        ingredients_position = ingredients.location["y"]
 
-            # Get the position of the follow button and the viewport height
-            element_position = follow_button.location["y"]
-            viewport_height = driver.execute_script("return window.innerHeight")
-
-            # Calculate the middle of the viewport
-            viewport_middle = viewport_height / 2
-
-            # Check if the follow button is in the middle of the viewport
-            if element_position > viewport_middle:
-                break
-
-            # Scroll further if the follow button is not yet in the middle
-            driver.execute_script("window.scrollBy(0, 300);")
-
+        #scroll to the follow button
+        scroll_script = "window.scrollBy(0, "+ str(ingredients_position-400) + ");"
+        driver.execute_script(scroll_script)
+        #find button
+        follow_button =  driver.find_element(By.XPATH, "//button[contains(text(), 'Follow')]")
         time.sleep(1)
         #click the follow button
         follow_button.click()
         
         time.sleep(2)
         #scroll to the follow button
-        scroll_script = "window.scrollBy(0, "+ str(element_position-400) + ");"
         driver.execute_script(scroll_script)
 
         time.sleep(2)
-        #check if its greyed out (user is already followed)
-        following_button = driver.find_element(By.CSS_SELECTOR,"span.following-btn")
+        #check if the unfollow button shows
+        unfollow_button = driver.find_element(By.XPATH, "//button[contains(text(), 'Unfollow')]")
         
           
         
-        assert following_button.is_displayed()  # Wait for up to 10 seconds
+        assert unfollow_button.is_displayed()
     
+    def test_following_unfollow(self):
+        #delete test follower to be created later. This is done to avoid filling up the database with test data
+        delete_test_follows(db_path)
+        driver = self.driver
+        driver.maximize_window()
+        driver.get("http://localhost:5000")
+
+        # Find the username and password input fields and enter the credentials
+        username_field = driver.find_element(By.NAME,"username")
+        password_field = driver.find_element(By.NAME,"password")
+        username_field.send_keys("followtester")
+        password_field.send_keys("followtester")
+
+        # Submit the login form
+        login_button = driver.find_element(By.NAME,"login")
+        login_button.click()
+
+        # Wait for the page to load after login (e.g., check for an element on the home page)
+        # Wait for up to 10 seconds
+        view_recipe_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.LINK_TEXT, "View Recipe Details")))
+        #scroll to bottom
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(1)
+        #click view recipe button
+        view_recipe_button.click()
+        time.sleep(1)
+        #look for comments section
+        ingredients = driver.find_element(By.XPATH, "//h4[@class='section-title' and text()='Ingredients']")
+        ingredients_position = ingredients.location["y"]
+
+        #scroll to the follow button
+        scroll_script = "window.scrollBy(0, "+ str(ingredients_position-400) + ");"
+        driver.execute_script(scroll_script)
+        #find button
+        follow_button =  driver.find_element(By.XPATH, "//button[contains(text(), 'Follow')]")
+        time.sleep(1)
+        #click the follow button
+        follow_button.click()
+        
+        time.sleep(2)
+        #scroll to the follow button
+        driver.execute_script(scroll_script)
+
+        time.sleep(2)
+        #check if the unfollow button shows
+        unfollow_button = driver.find_element(By.XPATH, "//button[contains(text(), 'Unfollow')]")
+        #click the follow button
+        time.sleep(1)
+        unfollow_button.click()
+        time.sleep(2)
+        #scroll to the follow button
+        driver.execute_script(scroll_script)
+        
+        follow_button =  driver.find_element(By.XPATH, "//button[contains(text(), 'Follow')]")
+
+        assert follow_button.is_displayed()
+    
+    def test_add_recipe_ingredients_to_shopping_list(self):
+        #delete test follower to be created later. This is done to avoid filling up the database with test data
+        delete_test_follows(db_path)
+        driver = self.driver
+        driver.maximize_window()
+        driver.get("http://localhost:5000")
+
+        # Find the username and password input fields and enter the credentials
+        username_field = driver.find_element(By.NAME,"username")
+        password_field = driver.find_element(By.NAME,"password")
+        username_field.send_keys("followtester")
+        password_field.send_keys("followtester")
+
+        # Submit the login form
+        login_button = driver.find_element(By.NAME,"login")
+        login_button.click()
+
+        # Wait for the page to load after login (e.g., check for an element on the home page)
+        # Wait for up to 10 seconds
+        view_recipe_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.LINK_TEXT, "View Recipe Details")))
+        #scroll to bottom
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(1)
+        #click view recipe button
+        view_recipe_button.click()
+        time.sleep(1)
+        #look for comments section
+        ingredients = driver.find_element(By.XPATH, "//h4[@class='section-title' and text()='Ingredients']")
+        ingredients_position = ingredients.location["y"]
+
+        #scroll to the follow button
+        scroll_script = "window.scrollBy(0, "+ str(ingredients_position-400) + ");"
+        driver.execute_script(scroll_script)
+        #find button
+        add_to_list_button =  driver.find_element(By.XPATH, '//*[@id="add-to-shopping-list-btn"]')
+        time.sleep(1)
+        #click the follow button
+        add_to_list_button.click()
+        
+        time.sleep(2)
+
+        success_msg = driver.find_element(By.XPATH, '//*[@id="success-message"]')
+
+        assert success_msg.is_displayed()
+
+    def test_add_to_shopping_list(self):
+        #delete test follower to be created later. This is done to avoid filling up the database with test data
+        delete_test_follows(db_path)
+        driver = self.driver
+        driver.maximize_window()
+        driver.get("http://localhost:5000")
+
+        # Find the username and password input fields and enter the credentials
+        username_field = driver.find_element(By.NAME,"username")
+        password_field = driver.find_element(By.NAME,"password")
+        username_field.send_keys("followtester")
+        password_field.send_keys("followtester")
+
+        # Submit the login form
+        login_button = driver.find_element(By.NAME,"login")
+        login_button.click()
+
+        # Wait for the page to load after login (e.g., check for an element on the home page)
+        time.sleep(1)
+        #look for comments section
+        shopping_list = driver.find_element(By.XPATH, '//a[contains(span,"Shopping List")]')
+        shopping_list.click()
+        time.sleep(2)
+        shopping_list_field = driver.find_element(By.XPATH,'/html/body/div[2]/div/div/form/div/input')
+        shopping_list_field.send_keys('Shopping_item')
+        add_to_list_button = driver.find_element(By.XPATH,'//*[@id="main-wrapper"]/div/div/form/button')
+        add_to_list_button.click()
+        time.sleep(2)
+        added_item = driver.find_element(By.XPATH,"//span[@class='item-name' and text()='Shopping_item']")
+        assert added_item.is_displayed()
+    
+    def test_following_card(self):
+        #delete test follower to be created later. This is done to avoid filling up the database with test data
+        driver = self.driver
+        driver.maximize_window()
+        driver.get("http://localhost:5000")
+
+        # Find the username and password input fields and enter the credentials
+        username_field = driver.find_element(By.NAME,"username")
+        password_field = driver.find_element(By.NAME,"password")
+        username_field.send_keys("Khaled Elbastawisy")
+        password_field.send_keys("Dodobasta5")
+
+        # Submit the login form
+        login_button = driver.find_element(By.NAME,"login")
+        login_button.click()
+
+        # Wait for the page to load after login (e.g., check for an element on the home page)
+        time.sleep(1)
+
+        following_tab = driver.find_element(By.XPATH,'//*[@id="main-wrapper"]/div/div[2]/div/div[1]/div[1]/div[1]/h5')
+
+        assert following_tab.is_displayed()
+
+    def test_notifications(self):
+        driver = self.driver
+        driver.maximize_window()
+        driver.get("http://localhost:5000")
+        # Find the username and password input fields and enter the credentials
+        username_field = driver.find_element(By.NAME,"username")
+        password_field = driver.find_element(By.NAME,"password")
+        username_field.send_keys("Khaled Elbastawisy")
+        password_field.send_keys("Dodobasta5")
+
+        # Submit the login form
+        login_button = driver.find_element(By.NAME,"login")
+        login_button.click()
+        
+        #Check if the notifications tab is visible
+        Notifications_tab = driver.find_element(By.XPATH,'//*[@id="main-wrapper"]/div/div[2]/div/div[2]/div/ul/li[2]/a')
+
+        Notifications_tab.click()
+
+        time.sleep(1)
+
+        assert Notifications_tab.is_displayed()
+
+    def test_favorites(self):
+
+        self.driver.get("http://localhost:5000")
+        # Find the username and password input fields and enter the credentials
+        username_field = self.driver.find_element(By.NAME,"username")
+        password_field = self.driver.find_element(By.NAME,"password")
+        username_field.send_keys("Khaled Elbastawisy")
+        password_field.send_keys("Dodobasta5")
+        self.driver.maximize_window()
+        # Submit the login form
+        login_button = self.driver.find_element(By.NAME,"login")
+        login_button.click()
+        time.sleep(2)
+        # Wait for the page to load after login (e.g., check for an element on the home page)
+        home_title = WebDriverWait(self.driver, 3).until(
+            EC.visibility_of_element_located((By.XPATH, "//h3[contains(text(),'Your online cookbook')]"))
+        )
+
+        # finding the browse all recipes button
+        browse_button = self.driver.find_element(By.XPATH, "//button[contains(@class, 'btn-primary') and contains(., 'Browse All Recipes')]")
+        browse_button.click()
+        time.sleep(2)
+
+        # Find the cards and loop over them
+        cards = self.driver.find_elements(By.CLASS_NAME, "card")
+        for card in cards:
+            try:
+                # Find the "Add to Favorites" button within the current card
+                add_to_favorites_button = card.find_element(By.XPATH, ".//a[contains(., 'Add to Favorites')]")
+
+                # Click thee button 
+                add_to_favorites_button.click()
+                time.sleep(2)
+
+                # Find the element containing the text "Added to Favorites" within the card element
+                added_favorites = self.driver.find_element(By.CLASS_NAME, "favorited-text")
+
+                self.assertTrue(added_favorites.is_displayed())
+                # Break the loop since the desired card is found
+                break
+            except NoSuchElementException:
+                pass  # Continue to the next card if the button is not found
+                
+    def test_user_profile(self):
+        driver = self.driver
+        driver.maximize_window()
+        driver.get("http://localhost:5000")
+        # Find the username and password input fields and enter the credentials
+        username_field = driver.find_element(By.NAME,"username")
+        password_field = driver.find_element(By.NAME,"password")
+        username_field.send_keys("Khaled Elbastawisy")
+        password_field.send_keys("Dodobasta5")
+
+        # Submit the login form
+        login_button = driver.find_element(By.NAME,"login")
+        login_button.click()
+        
+        #look for a followed user
+        followed_user = driver.find_element(By.XPATH,'//*[@id="main-wrapper"]/div/div[2]/div/div[1]/div[1]/div[2]/ul/li[1]/div[1]/strong/a')
+        followed_user.click()
+        #wait for user profile to load
+        time.sleep(2)
+        #Look for the unfollow button to make sure you are in the profile page
+        unfollow_button = driver.find_element(By.XPATH,'//*[@id="main-wrapper"]/div/div/div/div[1]/div/div/form/button')
+
+        assert unfollow_button.is_displayed()
+
     def test_comments(self):
         delete_test_comment(db_path)
         driver = self.driver
@@ -373,7 +620,6 @@ class WebAppTests(unittest.TestCase):
         comment_card = driver.find_element(By.XPATH, "//p[@class='card-text' and contains(text(), 'Nice Meal')]")
 
         assert comment_card.is_displayed()
-
 
     def test_rating(self):
         delete_test_rating(db_path)
@@ -450,7 +696,7 @@ class WebAppTests(unittest.TestCase):
         time.sleep(2)
         # Wait for the page to load after login (e.g., check for an element on the home page)
         home_title = WebDriverWait(self.driver, 3).until(
-            EC.visibility_of_element_located((By.XPATH, "//h3[contains(text(),'Browse and share your favorite recipes')]"))
+            EC.visibility_of_element_located((By.XPATH, "//h3[contains(text(),'Your online cookbook')]"))
         )
 
         # finding the browse all recipes button
@@ -520,10 +766,10 @@ class WebAppTests(unittest.TestCase):
 
         #Checking if the home page was opened
         home_title = WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located((By.XPATH, "//h3[contains(text(),'Browse and share your favorite recipes')]")))
+            EC.visibility_of_element_located((By.XPATH, "//h3[contains(text(),'Your online cookbook')]")))
         time.sleep(3)
         assert home_title.is_displayed()
-    
+
     def test_add_delete_recipe(self):
         delete_recipe(db_path)
         self.driver.get("http://localhost:5000")
@@ -540,7 +786,7 @@ class WebAppTests(unittest.TestCase):
         time.sleep(2)
         # Wait for the page to load after login (e.g., check for an element on the home page)
         home_title = WebDriverWait(self.driver, 3).until(
-            EC.visibility_of_element_located((By.XPATH, "//h3[contains(text(),'Browse and share your favorite recipes')]"))
+            EC.visibility_of_element_located((By.XPATH, "//h3[contains(text(),'Your online cookbook')]"))
         )
 
         # finding the browse all recipes button
@@ -610,7 +856,7 @@ class WebAppTests(unittest.TestCase):
 
         #Checking if the home page was opened
         home_title = WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located((By.XPATH, "//h3[contains(text(),'Browse and share your favorite recipes')]")))
+            EC.visibility_of_element_located((By.XPATH, "//h3[contains(text(),'Your online cookbook')]")))
         time.sleep(3)
 
         my_recipes_button = self.driver.find_element(By.XPATH, '//a[contains(span,"My Recipes")]')
@@ -627,8 +873,7 @@ class WebAppTests(unittest.TestCase):
         delete_button_xpath = f'{card_xpath}//following-sibling::form//button[@class="btn btn-danger"]'
         delete_button = self.driver.find_element(By.XPATH, delete_button_xpath)
 
-        #delete recipe references to avoid exceptions (code needs to be fixed)
-        delete_recipe_trails(db_path)
+
         # Click the delete button
         delete_button.click()
         time.sleep(3)
@@ -666,7 +911,7 @@ class WebAppTests(unittest.TestCase):
         time.sleep(2)
         # Wait for the page to load after login (e.g., check for an element on the home page)
         home_title = WebDriverWait(self.driver, 3).until(
-            EC.visibility_of_element_located((By.XPATH, "//h3[contains(text(),'Browse and share your favorite recipes')]"))
+            EC.visibility_of_element_located((By.XPATH, "//h3[contains(text(),'Your online cookbook')]"))
         )
 
         # finding the browse all recipes button
@@ -737,7 +982,7 @@ class WebAppTests(unittest.TestCase):
 
         #Checking if the home page was opened
         home_title = WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located((By.XPATH, "//h3[contains(text(),'Browse and share your favorite recipes')]")))
+            EC.visibility_of_element_located((By.XPATH, "//h3[contains(text(),'Your online cookbook')]")))
         time.sleep(3)
 
         my_recipes_button = self.driver.find_element(By.XPATH, '//a[contains(span,"My Recipes")]')
