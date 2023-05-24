@@ -220,6 +220,7 @@ def create_recipe():
             db.session.add(new_instruction)
             db.session.commit()
 
+        flash('Your recipe is live! Check it out now.', 'success')
 
         return redirect(url_for('home_blueprint.index'))
     else:
@@ -242,8 +243,23 @@ def add_to_favorites(recipe_id):
     # Save the changes to the database
     db.session.commit()
 
-    print('added to favorites')
-    print(profile.favorite_recipes)
+
+    # Redirect to the same page, or to another page as desired
+    return redirect(url_for('home_blueprint.browse_recipes'))
+
+@blueprint.route('/remove_from_favorites/<int:recipe_id>', methods=['GET'])
+@login_required
+def remove_from_favorites(recipe_id):
+    # Get the user object
+    user = current_user.id
+
+    # Remove the recipe to the user's favorites
+    profile = UserProfile.query.filter_by(user_id=user).first()
+
+    profile.remove_from_favorites(recipe_id)
+
+    # Save the changes to the database
+    db.session.commit()
 
     # Redirect to the same page, or to another page as desired
     return redirect(url_for('home_blueprint.browse_recipes'))
@@ -471,7 +487,8 @@ def delete_recipe(id):
     recipe = Recipe.query.get_or_404(id)
     db.session.delete(recipe)
     db.session.commit()
-
+    # Add flash message
+    flash('Recipe deleted successfully!', category='success')
     return redirect(url_for('home_blueprint.my_recipes'))
 
 def recipe_of_the_day():

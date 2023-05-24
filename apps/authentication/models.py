@@ -106,7 +106,7 @@ class Instruction(db.Model):
     
     #__tablename__ = 'Instruction'
     id = db.Column(db.Integer, primary_key=True)
-    method = db.Column(db.String(), unique=True)
+    method = db.Column(db.String(), unique=False, nullable=False)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=False)
 
     def __init__(self, **kwargs):
@@ -126,7 +126,7 @@ class Instruction(db.Model):
 class Ingredient(db.Model):
     #__tablename__ = 'Ingredient'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
+    name = db.Column(db.String(64), unique=False, nullable=False)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=False)
 
     def __init__(self, **kwargs):
@@ -241,6 +241,16 @@ class UserProfile(db.Model):
             # Add the recipe_id to the favorite_recipes list
             current_favorites = self.favorite_recipes
             current_favorites.append(recipe_id)
+
+            # Update the favorite_recipe_ids column with the new list
+            self.favorite_recipes = current_favorites
+    
+    def remove_from_favorites(self, recipe_id):
+        # Check if the recipe_id is in the favorite_recipes list
+        if recipe_id in self.favorite_recipes:
+            # Remove the recipe_id from the favorite_recipes list
+            current_favorites = self.favorite_recipes
+            current_favorites.remove(recipe_id)
 
             # Update the favorite_recipe_ids column with the new list
             self.favorite_recipes = current_favorites

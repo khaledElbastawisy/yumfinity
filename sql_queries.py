@@ -11,7 +11,7 @@ c = conn.cursor()
 
 #c.execute('''DROP TABLE IF EXISTS Users;''')
 
-c.execute('''DROP TABLE IF EXISTS Shopping_List;''')
+c.execute('''DROP TABLE IF EXISTS Ingredient;''')
 
 
 #c.execute('''DROP TABLE IF EXISTS Comment ;''')

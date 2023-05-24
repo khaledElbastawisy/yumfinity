@@ -66,11 +66,24 @@
     padding: 0;
     text-align: center;
     }
-.recipe-card {
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    overflow: hidden;
-    transition: 0.3s;
+
+    .recipe-card {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+      overflow: hidden;
+      transition: 0.3s;
+  }
+  .recipe-card-img {
+    height: 150px;
+    object-fit: cover;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.view-details-btn {
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.5px;
 }
 
 .recipe-card:hover {
@@ -114,8 +127,12 @@
     font-size: 18px;
 }
 .favorited-text {
-    color: #28a745; /* The same green color as the btn-success class */
-    font-weight: bold;
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  color: #4a4a4a;
+}
+.favorite-text-container {
+  margin-top: 5px;
 }
 .favorited-text i {
     margin-right: 5px; /* Add some spacing between the icon and the text */
@@ -317,3 +334,29 @@ a:hover {
   .follow-info div {
     text-align: center;
   }
+
+  .buttons-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.view-recipe-btn, .favorite-action-btn {
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  padding: 6px 12px;
+}
+
+.view-recipe-container {
+  margin-right: 10px;
+}
+.profile-body {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+.profile-card {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+}

@@ -7,12 +7,13 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/custom.css') }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="profile-body">
     <div class="container mt-5">
         <div class="row">
             <div class="col-md-4">
-                <div class="card">
+                <div class="card profile-card">
                     <div class="card-body">
                         <h3 class="card-title font-weight-bold">{{ user.username }}</h3>
                         <p class="card-text text-muted">{{ profile.biography if profile.biography else 'No Bio' }}</p>
@@ -37,18 +38,18 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-lg-8">
                 <div class="row">
                     {% for recipe in user_recipes %}
-                        <div class="col-lg-6 col-md-12 col-sm-6 mb-4">
-                            <div class="card h-100">
-                                <img src="{{ url_for('static', filename='/assets/images/' + recipe.image) }}" class="card-img-top" alt="{{ recipe.name }}">
+                        <div class="col-lg-4 col-md-6 col-sm-6 mb-4">
+                            <div class="card h-100 recipe-card">
+                                <img src="{{ url_for('static', filename='/assets/images/' + recipe.image) }}" class="card-img-top recipe-card-img" alt="{{ recipe.name }}">
                                 <div class="card-body">
                                     <h5 class="card-title font-weight-bold">{{ recipe.name }}</h5>
                                     <p class="card-text text-muted">{{ recipe.description }}</p>
                                 </div>
                                 <div class="card-footer">
-                                    <a href="{{ url_for('home_blueprint.recipe_details', recipe_id=recipe.id) }}" class="btn btn-secondary btn-sm"><i class="fas fa-info-circle"></i> View Details</a>
+                                    <a href="{{ url_for('home_blueprint.recipe_details', recipe_id=recipe.id) }}" class="btn btn-secondary btn-sm view-details-btn"><i class="fas fa-info-circle"></i> View Details</a>
                                 </div>
                             </div>
                         </div>

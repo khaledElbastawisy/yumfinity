@@ -6,6 +6,9 @@
 {% block stylesheets %}
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+Knujsl7/1L_dstPt3HV5HzF6Gvk/e3s0eJf1PtFfnFt00r" crossorigin="anonymous">
 <style>
+    body {
+        background-color: #f8f9fa;
+    }
     .card {
         border-radius: 10px;
         overflow: hidden;
@@ -29,68 +32,112 @@
     .rate-count {
         font-size: 0.9rem;
     }
+    .add-recipe-btn {
+        top: 20px;
+        right: 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 6px 12px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .add-recipe-btn:hover {
+        background-color: #0056b3;
+        color: #fff;
+        text-decoration: none;
+    }
 </style>
 {% endblock stylesheets %}
 
 {% block content %}
-
-<div class="container-fluid">
+<body>
+    <!-- Add this code to display flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
     <div class="row">
-        {%if recipes|length == 0%}
         <div class="col-md-12">
-            <div class="alert alert-info" role="alert">
-                <h4 class="alert-heading">No Recipes Found!</h4>
-                <p>It seems you have not added any recipes yet. Click the button below to add your first recipe.</p>
-                <hr>
-                <a href="{{ url_for('home_blueprint.create_recipe') }}" class="btn btn-primary">Add Recipe</a>
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        {%else%}
-        {% for recipe in recipes %}
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card">
-                {% if recipe.image %}
-                <img src="{{ url_for('static', filename='assets/images/' + recipe.image) }}" class="card-img-top" alt="{{ recipe.name }}">
-                {% endif %}
-                <div class="card-body">
-                    <h5 class="card-title">{{ recipe.name }}</h5>
-                    <p class="card-text">{{ recipe.description }}</p>
-                    <a href="{{ url_for('home_blueprint.edit_recipe', recipe_id=recipe.id) }}" class="btn btn-primary">Edit</a>
-                    <form action="{{ url_for('home_blueprint.delete_recipe', id=recipe.id) }}" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this recipe?')">Delete</button>
-                    </form>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item"><strong>Cuisine:</strong> {{ recipe.cuisine }}</li>
-                    <li class="list-group-item"><strong>Cook Time:</strong> {{ recipe.cooking_time }} minutes</li>
-                    <li class="list-group-item"><strong>Ingredients:</strong>
-                        <ul>
-                            {% for ingredient in recipe.ingredients %}
-                            <li class="ingredient">{{ ingredient.name }}</li>
-                            {% endfor %}
-                        </ul>
-                    </li>
-                    <li class="list-group-item"><strong>Instructions:</strong>
-                        <ol>
-                            {% for instruction in recipe.instructions %}
-                            <li class="instruction">{{ instruction.method }}</li>
-                            {% endfor %}
-                        </ol>
-                    </li>
-                    <li class="list-group-item"><strong>Rate:</strong> {{ recipe.rate }} <span class="rate-count">({{ recipe.rate_count }})</span></li>
-                    <li class="list-group-item"><strong>Comments:</strong>
-                        <ul>
-                            {% for comment in recipe.comments %}
-                            <li>{{ comment.content }}</li>
-                            {% endfor %}
-                        </ul>
-                    </li>
-                </ul>
-            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-        {%endif%}
     </div>
-</div>
+    {% endif %}
+    {% endwith %}
+    <!-- End of flash messages code -->
+
+    <div class="container-fluid py-4">
+
+        <div class="row">
+
+            {%if recipes|length == 0%}
+            <div class="col-md-12">
+                <div class="alert alert-info" role="alert">
+                    <h4 class="alert-heading">No Recipes Found!</h4>
+                    <p>It seems you have not added any recipes yet. Click the button below to add your first recipe.</p>
+                    <hr>
+                    <a href="{{ url_for('home_blueprint.create_recipe') }}" class="btn btn-primary">Add Your First Recipe</a>
+                </div>
+            {%else%}
+            <div class="col-md-12">
+                <h1 class="mb-4">My Recipes</h1>
+            <a href="{{ url_for('home_blueprint.create_recipe') }}" class="btn btn-primary add-recipe-btn">Add New Recipe</a>
+            </div>
+            
+            {% for recipe in recipes %}
+            <div class="col-md-6 col-lg-4 mb-4">
+
+                <div class="card">
+                    {% if recipe.image %}
+                    <img src="{{ url_for('static', filename='assets/images/' + recipe.image) }}" class="card-img-top" alt="{{ recipe.name }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ recipe.name }}</h5>
+                        <p class="card-text">{{ recipe.description }}</p>
+                        <a href="{{ url_for('home_blueprint.edit_recipe', recipe_id=recipe.id) }}" class="btn btn-primary">Edit</a>
+                        <form action="{{ url_for('home_blueprint.delete_recipe', id=recipe.id) }}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this recipe?')">Delete</button>
+                        </form>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>Cuisine:</strong> {{ recipe.cuisine }}</li>
+                        <li class="list-group-item"><strong>Cook Time:</strong> {{ recipe.cooking_time }} minutes</li>
+                        <li class="list-group-item"><strong>Ingredients:</strong>
+                            <ul>
+                                {% for ingredient in recipe.ingredients %}
+                                <li class="ingredient">{{ ingredient.name }}</li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                        <li class="list-group-item"><strong>Instructions:</strong>
+                            <ol>
+                                {% for instruction in recipe.instructions %}
+                                <li class="instruction">{{ instruction.method }}</li>
+                                {% endfor %}
+                            </ol>
+                        </li>
+                        <li class="list-group-item"><strong>Rate:</strong> {{ recipe.rate }} <span class="rate-count">({{ recipe.rate_count }})</span></li>
+                        <li class="list-group-item"><strong>Comments:</strong>
+                            <ul>
+                                {% for comment in recipe.comments %}
+                                <li>{{ comment.content }}</li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+            {% endfor %}
+            {%endif%}
+
+        </div>
+    </div>
 
 {% endblock content %}
 

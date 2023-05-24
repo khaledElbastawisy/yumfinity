@@ -7,6 +7,8 @@
 <head>
 <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/custom.css') }}" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
+<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
 <script>
     function toggleFavorites() {
         const showFavoritesButton = document.getElementById('show-favorites-btn');
@@ -36,7 +38,6 @@
             <input type="text" class="form-control" name="recipe_name" placeholder="Search by recipe name">
             <select class="form-control" name="cuisine">
                 <option value="">Select cuisine</option>
-                <!-- Replace the list of cuisines with your actual data -->
                 {% for cuisine in cuisines %}
                     <option value="{{ cuisine }}">{{ cuisine }}</option>
                 {% endfor %}
@@ -46,11 +47,11 @@
     </div>
         <!-- Add the "Show Favorites" button -->
         <button type="button" class="btn btn-secondary" id="show-favorites-btn" onclick="toggleFavorites()">Show Favorites</button>
-    {% if searched %}
-    <div class="results-count" id="results-count">
-        <p class="text-muted"> We found {{ recipes_count }} recipe(s) matching your search!</p>
-    </div>
-    {% endif %}
+        {% if searched %}
+        <div class="results-count" id="results-count">
+            <p class="text-muted"> We found {{ recipes_count }} recipe(s) matching your search!</p>
+        </div>
+        {% endif %}
 </div>
 
 
@@ -66,24 +67,39 @@
                 <div class="card-body d-flex flex-column">
                     <div>
                         <h5 class="card-title mb-1">{{ recipe.name }}</h5>
-                     </div>
+                        {% if recipe.id in favorite_recipes %}
+                        <div class="favorite-text-container">
+                            <span class="favorited-text mx-2">
+                                <i class="fas fa-check"></i>
+                                Added to Favorites
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
                     {% if recipe.cuisine %}
                     <p class="card-text mt-auto mb-3"><strong>Cuisine:</strong> {{ recipe.cuisine }}</p>
                     {% endif %}
-                    <div class="d-flex justify-content-between align-items-center">
-                        <a href="{{ url_for('home_blueprint.recipe_details', recipe_id=recipe.id) }}" class="btn btn-primary">View Recipe</a>
-                        {% if recipe.id in favorite_recipes %}
-                        <span class="favorited-text">
-                            <i class="fas fa-check"></i>
-                            Added to Favorites
-                        </span>
-                        {% else %}
-                        <a href="{{ url_for('home_blueprint.add_to_favorites', recipe_id=recipe.id) }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-star"></i>
-                            Add to Favorites
-                        </a>
-                        {% endif %}
+
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="view-recipe-container">
+                            <a href="{{ url_for('home_blueprint.recipe_details', recipe_id=recipe.id) }}" class="btn btn-primary btn-sm view-recipe-btn">View Recipe</a>
+                        </div>
+                    
+                        <div class="favorite-action-container">
+                            {% if recipe.id in favorite_recipes %}
+                            <a href="{{ url_for('home_blueprint.remove_from_favorites', recipe_id=recipe.id) }}" class="btn btn-outline-danger btn-sm favorite-action-btn">
+                                <i class="fas fa-trash-alt"></i>
+                                Remove from Favorites
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('home_blueprint.add_to_favorites', recipe_id=recipe.id) }}" class="btn btn-outline-secondary btn-sm favorite-action-btn">
+                                <i class="fas fa-star"></i>
+                                Add to Favorites
+                            </a>
+                            {% endif %}
+                        </div>
                     </div>
+
                 </div>
             </div>
         </div>

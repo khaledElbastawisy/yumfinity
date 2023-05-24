@@ -11,6 +11,17 @@
 </head>
 
 <body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container mt-3">
+        {% for category, message in messages %}
+          <div class="alert alert-danger" role="alert">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
   <div class="container mt-5">
       <div class="card">
           <div class="card-body">
@@ -58,17 +69,7 @@
                       </div>
                   </div>
                   <div class="form-group">
-                      {% with messages = get_flashed_messages(with_categories=true) %}
-                      {% if messages %}
-                        <div class="container mt-3">
-                          {% for category, message in messages %}
-                            <div class="alert alert-danger" role="alert">
-                              {{ message }}
-                            </div>
-                          {% endfor %}
-                        </div>
-                      {% endif %}
-                    {% endwith %}
+
                       <label for="{{ form.image.id }}">Image</label>
                           {{ form.image(class='form-control') }}
                     </div>
