@@ -515,8 +515,8 @@ class WebAppTests(unittest.TestCase):
         # Find the username and password input fields and enter the credentials
         username_field = self.driver.find_element(By.NAME,"username")
         password_field = self.driver.find_element(By.NAME,"password")
-        username_field.send_keys("Khaled Elbastawisy")
-        password_field.send_keys("Dodobasta5")
+        username_field.send_keys("test_recipe")
+        password_field.send_keys("test_recipe")
         self.driver.maximize_window()
         # Submit the login form
         login_button = self.driver.find_element(By.NAME,"login")
@@ -543,10 +543,18 @@ class WebAppTests(unittest.TestCase):
                 add_to_favorites_button.click()
                 time.sleep(2)
 
-                # Find the element containing the text "Added to Favorites" within the card element
-                added_favorites = self.driver.find_element(By.CLASS_NAME, "favorited-text")
+                # Find the element containing the text "Remove from Favourites" within the card element
+                added_favorites = self.driver.find_element(By.XPATH,'//a[contains(., "Remove from Favorites")]')
 
-                self.assertTrue(added_favorites.is_displayed())
+                #if the item was added to favourites click on it and test if its removed
+                if added_favorites.is_displayed():
+                     added_favorites.click()
+
+                     time.sleep(2)
+
+                     add_to_favorites_button = self.driver.find_element(By.XPATH, "//a[contains(., 'Add to Favorites')]")
+
+                     self.assertTrue(add_to_favorites_button.is_displayed())
                 # Break the loop since the desired card is found
                 break
             except NoSuchElementException:
@@ -1070,6 +1078,66 @@ class WebAppTests(unittest.TestCase):
 
         alert_div = self.driver.find_element(By.XPATH, '//div[contains(@class, "alert") and contains(@class, "alert-danger") and @role="alert"]')
         self.assertTrue(alert_div.is_displayed())
+
+        
+    def test_update_profile(self):
+         
+        self.driver.get("http://localhost:5000")
+        # Find the username and password input fields and enter the credentials
+        user_field = self.driver.find_element(By.NAME,"username")
+        password_field = self.driver.find_element(By.NAME,"password")
+        user_field.send_keys("Khaled Elbastawisy")
+        password_field.send_keys("Dodobasta5")
+        self.driver.maximize_window()
+        # Submit the login form
+        login_button = self.driver.find_element(By.NAME,"login")
+        login_button.click()
+        time.sleep(2)
+        # Wait for the page to load after login (e.g., check for an element on the home page)
+        home_title = WebDriverWait(self.driver, 3).until(
+            EC.visibility_of_element_located((By.XPATH, "//h3[contains(text(),'Your online cookbook')]"))
+        )
+
+        profile_button = self.driver.find_element(By.XPATH, '//a[contains(span,"Profile")]')
+        profile_button.click()
+        time.sleep(2)
+
+        # Find the Username field
+        username_field = self.driver.find_element(By.NAME,'username')
+        username_text = username_field.get_attribute('value')
+
+        # Find the Email field
+        email_field = self.driver.find_element(By.NAME,'email')
+        email_text = email_field.get_attribute('value')
+
+        # Find the Biography field
+        biography_field = self.driver.find_element(By.NAME,'bio')
+        biography_text = biography_field.get_attribute('value')
+        
+        #clearing the fields
+        username_field.clear()
+        email_field.clear()
+        biography_field.clear()
+
+        #update the fields
+        username_field.send_keys("this is my updated username")
+        email_field.send_keys("myupdatedmail@wadyYaBro.com")
+        biography_field.send_keys("this is my updated biography")
+
+        #find the update button and click it
+        update_button = self.driver.find_element(By.CLASS_NAME,'btn-success')
+        update_button.click()
+        time.sleep(2)
+
+        # Find the Username field
+        username_field = self.driver.find_element(By.NAME,'username')
+        username_field.clear()
+        username_field.send_keys("Khaled Elbastawisy")
+        update_button = self.driver.find_element(By.CLASS_NAME,'btn-success')
+        update_button.click()
+        time.sleep(2)
+        
+        
 
 if __name__ == '__main__':
     unittest.main()
