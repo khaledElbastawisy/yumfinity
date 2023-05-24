@@ -636,6 +636,7 @@ def update_user():
 
 
         db.session.commit()
+        flash("Profile updated successfully", "success")
         return redirect(url_for("home_blueprint.my_profile"))
 
     user = User.query.get(1)  # Replace this with the current user's ID
